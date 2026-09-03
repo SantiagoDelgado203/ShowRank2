@@ -23,17 +23,20 @@ public class AniListService(HttpClient httpClient)
         }
         """;
 
+    //API call, 
     public async Task<List<SearchResult>> SearchAsync(string query, int limit = 10, CancellationToken cancellationToken = default)
     {
+        //query + api
         var payload = new { query = Query, variables = new { search = query, perPage = limit } };
         using var response = await httpClient.PostAsJsonAsync(Endpoint, payload, cancellationToken);
         response.EnsureSuccessStatusCode();
-
+        //parse
         using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
         var mediaList = doc.RootElement.GetProperty("data").GetProperty("Page").GetProperty("media");
 
         var results = new List<SearchResult>();
+        //loop through json
         foreach (var media in mediaList.EnumerateArray())
         {
             var title = media.GetProperty("title");
@@ -65,7 +68,7 @@ public class AniListService(HttpClient httpClient)
 
             results.Add(new SearchResult(name ?? "Untitled", imageUrl, description, rating, genres, MediaKind.Anime, siteUrl));
         }
-
+        //return list of shows
         return results;
     }
 }
