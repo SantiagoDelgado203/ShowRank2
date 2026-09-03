@@ -31,6 +31,9 @@
     {
         <p class="section-subtitle">@results.Count result@(results.Count == 1 ? "" : "s") for "@Q"</p>
         <div class="show-grid">
+@* for each of the shows, it makes a card. Card has multiple values such as the image, description, 
+and it's doing checks to see if that value was provided. If not, it defaults to something else. '
+*@
             @foreach (var result in results)
             {
                 <div class="show-card">
@@ -99,6 +102,8 @@
     }
 </section>
 
+@* All it's doing is loading and getting the results of the query. *@
+@* If the user is not signed in. all the buttons just say to sign in. *@
 @code {
     [CascadingParameter]
     public HttpContext HttpContext { get; set; } = default!;
