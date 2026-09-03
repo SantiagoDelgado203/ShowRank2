@@ -1,35 +1,47 @@
 <div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
+    <div class="container-fluid nav-top-content">
         <a class="navbar-brand" href="">Show<span class="accent">Rank</span></a>
+
+        <div class="nav-search">
+            <SearchBox Dark="true" />
+        </div>
+
+        <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+        <nav class="nav-links">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="calendar">
+                    Calendar
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="rankings">
+                    Community Rankings
+                </NavLink>
+            </div>
+
+            <AuthorizeView Context="authState">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link profile-link" href="account" title="@($"Signed in as {authState.User.Identity?.Name}")">
+                            <span class="profile-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                    <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12Zm0 2.4c-3.4 0-9.8 1.7-9.8 5.1v2.3h19.6v-2.3c0-3.4-6.4-5.1-9.8-5.1Z" />
+                                </svg>
+                            </span>
+                            <span class="visually-hidden">Your profile</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="account">
+                            Sign in
+                        </NavLink>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+        </nav>
     </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="calendar">
-                Calendar
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="rankings">
-                Community Rankings
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="account">
-                Sign in/up
-            </NavLink>
-        </div>
-    </nav>
 </div>

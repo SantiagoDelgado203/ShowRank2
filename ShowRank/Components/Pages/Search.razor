@@ -1,0 +1,86 @@
+@page "/search"
+@attribute [StreamRendering(true)]
+@using Microsoft.AspNetCore.Components
+@using ShowRank.Models
+@using ShowRank.Services
+@inject SearchService SearchService
+
+<PageTitle>Search – ShowRank</PageTitle>
+
+<section class="search-page">
+    <h1>Search</h1>
+    <div class="search-page-box">
+        <SearchBox Query="@Q" />
+    </div>
+
+    @if (string.IsNullOrWhiteSpace(Q))
+    {
+        <p class="section-subtitle">Search for anime or TV shows above to get started.</p>
+    }
+    else if (results == null)
+    {
+        <p class="section-subtitle">Searching for "@Q"...</p>
+    }
+    else if (results.Count == 0)
+    {
+        <p class="section-subtitle">No results found for "@Q".</p>
+    }
+    else
+    {
+        <p class="section-subtitle">@results.Count result@(results.Count == 1 ? "" : "s") for "@Q"</p>
+        <div class="show-grid">
+            @foreach (var result in results)
+            {
+                <a class="show-card" href="@result.SourceUrl" target="_blank" rel="noopener noreferrer">
+                    <div class="show-poster">
+                        @if (!string.IsNullOrEmpty(result.ImageUrl))
+                        {
+                            <img src="@result.ImageUrl" alt="@result.Title" />
+                        }
+                        else
+                        {
+                            <span>@result.Title[..1]</span>
+                        }
+                    </div>
+                    <div class="show-info">
+                        <span class="kind-tag kind-@result.Kind.ToString().ToLowerInvariant()">
+                            @(result.Kind == MediaKind.Anime ? "Anime" : "TV Show")
+                        </span>
+                        <h3>@result.Title</h3>
+                        <span class="genre-tag">@result.Genre</span>
+                        @if (!string.IsNullOrEmpty(result.Description))
+                        {
+                            <p>@TextUtils.Truncate(result.Description, 140)</p>
+                        }
+                        @if (result.Rating.HasValue)
+                        {
+                            <div class="show-rating">
+                                <span class="stars">★ @result.Rating.Value.ToString("0.0")/10</span>
+                            </div>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>
+
+@code {
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? Q { get; set; }
+
+    private List<SearchResult>? results;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        results = null;
+
+        if (string.IsNullOrWhiteSpace(Q))
+        {
+            results = [];
+            return;
+        }
+
+        results = await SearchService.SearchAsync(Q);
+    }
+}

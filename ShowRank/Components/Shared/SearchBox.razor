@@ -1,0 +1,12 @@
+<form method="get" action="/search" class="search-box @(Dark ? "search-box-dark" : "search-box-light")">
+    <input type="search" name="q" value="@Query" placeholder="Search anime & shows..." class="search-input" aria-label="Search anime and shows" />
+    <button type="submit" class="search-button">Search</button>
+</form>
+
+@code {
+    [Parameter]
+    public string? Query { get; set; }
+
+    [Parameter]
+    public bool Dark { get; set; }
+}

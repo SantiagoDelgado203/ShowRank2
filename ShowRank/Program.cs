@@ -1,10 +1,29 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using ShowRank.Components;
+using ShowRank.Data;
+using ShowRank.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddSingleton<UserStore>();
+builder.Services.AddScoped<AuthService>();
+
+builder.Services.AddHttpClient<AniListService>();
+builder.Services.AddHttpClient<TvMazeService>();
+builder.Services.AddScoped<SearchService>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/account";
+        options.AccessDeniedPath = "/account";
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
@@ -17,6 +36,9 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseAntiforgery();
 

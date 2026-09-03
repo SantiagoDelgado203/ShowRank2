@@ -28,6 +28,8 @@
     color: #888;
     cursor: pointer;
     border-bottom: 2px solid transparent;
+    text-align: center;
+    text-decoration: none;
 }
 
 .auth-tab.active {

@@ -58,3 +58,78 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.genre-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #6c757d;
+    background-color: #f1f1f4;
+    border-radius: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    margin: 0.35rem 0;
+}
+
+.show-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.show-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    color: inherit;
+    text-decoration: none;
+}
+
+.show-poster {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    background-color: #6c757d;
+    overflow: hidden;
+}
+
+.show-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.show-info {
+    padding: 1rem;
+}
+
+.show-info h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.show-info p {
+    font-size: 0.9rem;
+    color: #444;
+    margin: 0.5rem 0;
+}
+
+.show-rating {
+    font-size: 0.85rem;
+}
+
+.stars {
+    color: #d6a300;
+    font-weight: 600;
+}
+
+.review-count {
+    color: #6c757d;
+    margin-left: 0.35rem;
+}

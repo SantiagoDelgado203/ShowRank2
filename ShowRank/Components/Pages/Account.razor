@@ -1,22 +1,41 @@
 @page "/account"
+@page "/account/{Mode}"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
 @using ShowRank.Models
+@using ShowRank.Services
+@inject AuthService AuthService
+@inject NavigationManager Nav
 
 <PageTitle>Sign In or Sign Up – ShowRank</PageTitle>
 
-<section class="auth-section">
-    <div class="auth-card">
-        <div class="auth-tabs">
-            <button type="button" class="auth-tab @(ShowSignUp ? "" : "active")" @onclick="() => ShowSignUp = false">
+<AuthorizeView Context="authState">
+    <Authorized>
+        <section class="auth-section">
+            <div class="auth-card">
+                <h2>Hi, @authState.User.Identity?.Name</h2>
+                <p class="auth-message">You're signed in as @authState.User.FindFirst(ClaimTypes.Email)?.Value.</p>
+                <a class="btn btn-outline-secondary w-100" href="logout">Sign out</a>
+            </div>
+        </section>
+    </Authorized>
+    <NotAuthorized>
+        <section class="auth-section">
+            <div class="auth-card">
+                <div class="auth-tabs">
+            <a href="/account" class="auth-tab @(ShowSignUp ? "" : "active")">
                 Sign In
-            </button>
-            <button type="button" class="auth-tab @(ShowSignUp ? "active" : "")" @onclick="() => ShowSignUp = true">
+            </a>
+            <a href="/account/signup" class="auth-tab @(ShowSignUp ? "active" : "")">
                 Create Account
-            </button>
+            </a>
         </div>
 
         @if (!ShowSignUp)
         {
-            <EditForm Model="@signInModel" OnValidSubmit="HandleSignIn" class="auth-form">
+            <EditForm Model="@signInModel" FormName="signin" OnValidSubmit="HandleSignIn" class="auth-form">
                 <DataAnnotationsValidator />
 
                 <div class="mb-3">
@@ -41,7 +60,7 @@
         }
         else
         {
-            <EditForm Model="@signUpModel" OnValidSubmit="HandleSignUp" class="auth-form">
+            <EditForm Model="@signUpModel" FormName="signup" OnValidSubmit="HandleSignUp" class="auth-form">
                 <DataAnnotationsValidator />
 
                 <div class="mb-3">
@@ -76,22 +95,68 @@
                 }
             </EditForm>
         }
-    </div>
-</section>
+            </div>
+        </section>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-    private readonly SignInModel signInModel = new();
-    private readonly SignUpModel signUpModel = new();
-    private bool ShowSignUp;
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; } = default!;
+
+    [Parameter]
+    public string? Mode { get; set; }
+
+    [SupplyParameterFromForm(FormName = "signin")]
+    private SignInModel signInModel { get; set; } = new();
+
+    [SupplyParameterFromForm(FormName = "signup")]
+    private SignUpModel signUpModel { get; set; } = new();
+
     private string? authMessage;
 
-    private void HandleSignIn()
+    private bool ShowSignUp => string.Equals(Mode, "signup", StringComparison.OrdinalIgnoreCase);
+
+    protected override void OnParametersSet()
     {
-        authMessage = $"Thanks, {signInModel.Email}! Sign-in isn't wired up to an account system yet.";
+        signInModel ??= new();
+        signUpModel ??= new();
     }
 
-    private void HandleSignUp()
+    private async Task HandleSignIn()
     {
-        authMessage = $"Welcome, {signUpModel.DisplayName}! Account creation isn't wired up yet, but we've got your info.";
+        var (success, error, user) = await AuthService.ValidateCredentialsAsync(signInModel);
+        if (!success || user is null)
+        {
+            authMessage = error;
+            return;
+        }
+
+        await SignInUserAsync(user);
+    }
+
+    private async Task HandleSignUp()
+    {
+        var (success, error, user) = await AuthService.RegisterAsync(signUpModel);
+        if (!success || user is null)
+        {
+            authMessage = error;
+            return;
+        }
+
+        await SignInUserAsync(user);
+    }
+
+    private async Task SignInUserAsync(Models.User user)
+    {
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.DisplayName),
+            new(ClaimTypes.Email, user.Email),
+        };
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+        Nav.NavigateTo("/", forceLoad: true);
     }
 }
