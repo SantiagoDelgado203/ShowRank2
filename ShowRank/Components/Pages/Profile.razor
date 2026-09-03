@@ -1,0 +1,110 @@
+@* [Authorize] means anonymous visitors are redirected straight to the cookie's LoginPath 
+   (/account, configured in Program.cs) *@
+@page "/profile"
+@attribute [Authorize]
+
+@* StreamRendering lets us show a placeholder (e.g. "Loading...") while the watched list
+   is fetched asynchronously. *@
+@attribute [StreamRendering(true)]
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using ShowRank.Data
+@using ShowRank.Models
+@inject WatchedListStore WatchedListStore
+
+<PageTitle>Your Profile – ShowRank</PageTitle>
+
+<AuthorizeView Context="authState">
+    <Authorized>
+        @* Identity summary card: who you are, plus a sign-out link. Signing out is a
+           separate page (/logout) rather than a button here because it also needs to
+           run as a HTTP request to clear the authurization cookie. *@
+        <section class="auth-section">
+            <div class="auth-card">
+                <h2>Hi, @authState.User.Identity?.Name</h2>
+                <p class="auth-message">You're signed in as @authState.User.FindFirst(ClaimTypes.Email)?.Value.</p>
+                <a class="btn btn-outline-secondary w-100" href="logout">Sign out</a>
+            </div>
+        </section>
+
+        @* The watched list: a search box shortcut into /search, and a grid of everything
+           the signed-in user has saved. watchedItems is fetched in OnParametersSetAsync below. *@
+        <section class="watched-section">
+            <h2>Your Watched List</h2>
+            <p class="section-subtitle">Search for anime or shows to add them here.</p>
+            <div class="profile-search-box">
+                <SearchBox />
+            </div>
+
+            @if (watchedItems == null)
+            {
+                @* Shown briefly while OnParametersSetAsync's await is in flight (streaming render). *@
+                <p class="section-subtitle">Loading...</p>
+            }
+            else if (watchedItems.Count == 0)
+            {
+                <p class="section-subtitle">You haven't added anything yet. Use search to find something to watch!</p>
+            }
+            else
+            {
+                <div class="show-grid">
+                    @foreach (var item in watchedItems)
+                    {
+                        <div class="show-card">
+                            @* Clicking the card (image/title/etc.) opens the source page (AniList/TVMaze). *@
+                            <a class="show-card-link" href="@item.SourceUrl" target="_blank" rel="noopener noreferrer">
+                                <div class="show-poster">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Title" />
+                                    }
+                                    else
+                                    {
+                                        @* No poster available from the source API: fall back to the first letter. *@
+                                        <span>@item.Title[..1]</span>
+                                    }
+                                </div>
+                                <div class="show-info">
+                                    <span class="kind-tag kind-@item.Kind.ToString().ToLowerInvariant()">
+                                        @(item.Kind == MediaKind.Anime ? "Anime" : "TV Show")
+                                    </span>
+                                    <h3>@item.Title</h3>
+                                    <span class="genre-tag">@item.Genre</span>
+                                    @if (item.Rating.HasValue)
+                                    {
+                                        <div class="show-rating">
+                                            <span class="stars">★ @item.Rating.Value.ToString("0.0")/10</span>
+                                        </div>
+                                    }
+                                </div>
+                            </a>
+                            @* A plain HTML form posting to the minimal API endpoint in
+                               Endpoints/WatchedEndpoints.cs, not a Blazor EditForm. Using a
+                               real <form> here avoids needing a unique FormName per grid item. *@
+                            <form method="post" action="/watched/remove" class="watched-action-form">
+                                <input type="hidden" name="sourceUrl" value="@item.SourceUrl" />
+                                <input type="hidden" name="returnUrl" value="/profile" />
+                                <button type="submit" class="btn-watched added">Remove</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    // Supplied automatically by the framework during static server-side rendering.
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; } = default!;
+
+    private List<WatchedItem>? watchedItems;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Finds users watched items. 
+        var userId = int.Parse(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        watchedItems = await WatchedListStore.GetForUserAsync(userId);
+    }
+}

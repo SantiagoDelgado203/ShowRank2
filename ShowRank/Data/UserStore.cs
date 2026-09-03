@@ -3,11 +3,16 @@ using ShowRank.Models;
 
 namespace ShowRank.Data;
 
+// Called by AuthService.
+// File-backed user store (App_Data/users.json) — no database
 public class UserStore
 {
     private readonly string _filePath;
+
+    // Lock that ensures multiple sign-ups can't overwrite each other's changes.
     private readonly SemaphoreSlim _lock = new(1, 1);
 
+    // Initialize folder path.
     public UserStore(IWebHostEnvironment env)
     {
         var dataDir = Path.Combine(env.ContentRootPath, "App_Data");
@@ -23,9 +28,11 @@ public class UserStore
 
     public async Task<User> AddAsync(User user)
     {
+        // Lock to prevent race conditions. 
         await _lock.WaitAsync();
         try
         {
+            // Read file to see if user exists. 
             var users = await ReadAllAsync();
             user.Id = users.Count == 0 ? 1 : users.Max(u => u.Id) + 1;
             users.Add(user);
@@ -38,6 +45,7 @@ public class UserStore
         }
     }
 
+    // Reads skip the lock (only writes need to serialize)
     private async Task<List<User>> ReadAllAsync()
     {
         if (!File.Exists(_filePath))

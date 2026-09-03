@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using ShowRank.Components;
 using ShowRank.Data;
+using ShowRank.Endpoints;
 using ShowRank.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddSingleton<UserStore>();
 //Each user gets their own(scope is per circuit(per connecetd client)
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<WatchedListStore>();
 
 //Adding our services
 builder.Services.AddHttpClient<AniListService>();
@@ -52,5 +54,6 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+app.MapWatchedEndpoints();
 
 app.Run();

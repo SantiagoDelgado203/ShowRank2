@@ -1,9 +1,11 @@
 @page "/search"
 @attribute [StreamRendering(true)]
-@using Microsoft.AspNetCore.Components
+@using System.Security.Claims
+@using ShowRank.Data
 @using ShowRank.Models
 @using ShowRank.Services
 @inject SearchService SearchService
+@inject WatchedListStore WatchedListStore
 
 <PageTitle>Search – ShowRank</PageTitle>
 
@@ -29,51 +31,105 @@
     {
         <p class="section-subtitle">@results.Count result@(results.Count == 1 ? "" : "s") for "@Q"</p>
         <div class="show-grid">
+@* for each of the shows, it makes a card. Card has multiple values such as the image, description, 
+and it's doing checks to see if that value was provided. If not, it defaults to something else. '
+*@
             @foreach (var result in results)
             {
-                <a class="show-card" href="@result.SourceUrl" target="_blank" rel="noopener noreferrer">
-                    <div class="show-poster">
-                        @if (!string.IsNullOrEmpty(result.ImageUrl))
-                        {
-                            <img src="@result.ImageUrl" alt="@result.Title" />
-                        }
-                        else
-                        {
-                            <span>@result.Title[..1]</span>
-                        }
-                    </div>
-                    <div class="show-info">
-                        <span class="kind-tag kind-@result.Kind.ToString().ToLowerInvariant()">
-                            @(result.Kind == MediaKind.Anime ? "Anime" : "TV Show")
-                        </span>
-                        <h3>@result.Title</h3>
-                        <span class="genre-tag">@result.Genre</span>
-                        @if (!string.IsNullOrEmpty(result.Description))
-                        {
-                            <p>@TextUtils.Truncate(result.Description, 140)</p>
-                        }
-                        @if (result.Rating.HasValue)
-                        {
-                            <div class="show-rating">
-                                <span class="stars">★ @result.Rating.Value.ToString("0.0")/10</span>
+                <div class="show-card">
+                    <a class="show-card-link" href="@result.SourceUrl" target="_blank" rel="noopener noreferrer">
+                        <div class="show-poster">
+                            @if (!string.IsNullOrEmpty(result.ImageUrl))
+                            {
+                                <img src="@result.ImageUrl" alt="@result.Title" />
+                            }
+                            else
+                            {
+                                <span>@result.Title[..1]</span>
+                            }
+                        </div>
+                        <div class="show-info">
+                            <span class="kind-tag kind-@result.Kind.ToString().ToLowerInvariant()">
+                                @(result.Kind == MediaKind.Anime ? "Anime" : "TV Show")
+                            </span>
+                            <h3>@result.Title</h3>
+                            <span class="genre-tag">@result.Genre</span>
+                            @if (!string.IsNullOrEmpty(result.Description))
+                            {
+                                <p>@TextUtils.Truncate(result.Description, 140)</p>
+                            }
+                            @if (result.Rating.HasValue)
+                            {
+                                <div class="show-rating">
+                                    <span class="stars">★ @result.Rating.Value.ToString("0.0")/10</span>
+                                </div>
+                            }
+                        </div>
+                    </a>
+                    <AuthorizeView>
+                        <Authorized>
+                            @if (watchedUrls.Contains(result.SourceUrl))
+                            {
+                                <form method="post" action="/watched/remove" class="watched-action-form">
+                                    <input type="hidden" name="sourceUrl" value="@result.SourceUrl" />
+                                    <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+                                    <button type="submit" class="btn-watched added">✓ In Watched List</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" action="/watched/add" class="watched-action-form">
+                                    <input type="hidden" name="title" value="@result.Title" />
+                                    <input type="hidden" name="imageUrl" value="@result.ImageUrl" />
+                                    <input type="hidden" name="genre" value="@result.Genre" />
+                                    <input type="hidden" name="rating" value="@result.Rating" />
+                                    <input type="hidden" name="kind" value="@result.Kind" />
+                                    <input type="hidden" name="sourceUrl" value="@result.SourceUrl" />
+                                    <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+                                    <button type="submit" class="btn-watched">+ Add to Watched List</button>
+                                </form>
+                            }
+                        </Authorized>
+                        <NotAuthorized>
+                            <div class="watched-action-form">
+                                <a class="btn-watched" href="/account">Sign in to track</a>
                             </div>
-                        }
-                    </div>
-                </a>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
             }
         </div>
     }
 </section>
 
+@* All it's doing is loading and getting the results of the query. *@
+@* If the user is not signed in. all the buttons just say to sign in. *@
 @code {
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; } = default!;
+
     [SupplyParameterFromQuery(Name = "q")]
     public string? Q { get; set; }
 
     private List<SearchResult>? results;
+    private HashSet<string> watchedUrls = [];
+
+    private string ReturnUrl => $"/search?q={Uri.EscapeDataString(Q ?? string.Empty)}";
 
     protected override async Task OnParametersSetAsync()
     {
         results = null;
+
+        if (HttpContext.User.Identity?.IsAuthenticated == true)
+        {
+            var userId = int.Parse(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var watched = await WatchedListStore.GetForUserAsync(userId);
+            watchedUrls = watched.Select(w => w.SourceUrl).ToHashSet();
+        }
+        else
+        {
+            watchedUrls = [];
+        }
 
         if (string.IsNullOrWhiteSpace(Q))
         {
