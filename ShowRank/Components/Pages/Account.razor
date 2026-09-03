@@ -1,12 +1,10 @@
-@* Sign in / create account only. Once signed in, this page immediately redirects to
-   /profile (see OnInitialized below) rather than showing account info here — that
-   content now lives in Profile.razor.
-   "/account/{Mode}" lets the URL be /account/signup to pre-select the Create Account tab. *@
+@* "/account/{Mode}" lets the URL be /account/signup to pre-select the Create Account tab. *@
 @page "/account"
 @page "/account/{Mode}"
 
 @* Allows you to pass and store the user's information. *@
 @using System.Security.Claims
+
 @using ShowRank.Models
 @using ShowRank.Services
 
@@ -130,9 +128,8 @@
 
     protected override void OnParametersSet()
     {
-        // [SupplyParameterFromForm] can hand back null instead of respecting the property
-        // initializer (e.g. on the very first GET before any form has ever posted), so we
-        // guard against that here rather than relying on the initializer alone.
+        // Protect against nulls when the user navigates between the Sign In and Create Account tabs.
+        // "if signInModel is currently null, assign it a new SignInModel(). 
         signInModel ??= new();
         signUpModel ??= new();
     }
@@ -155,7 +152,7 @@
         var (success, error, user) = await AuthService.RegisterAsync(signUpModel);
         if (!success || user is null)
         {
-            // e.g. email already registered.
+            // ex: email already registered.
             authMessage = error;
             return;
         }
