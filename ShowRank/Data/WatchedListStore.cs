@@ -3,9 +3,13 @@ using ShowRank.Models;
 
 namespace ShowRank.Data;
 
+// File-backed watched-list store (App_Data/watched.json) — all users' items in one flat
+// file, filtered by UserId 
 public class WatchedListStore
 {
     private readonly string _filePath;
+
+    // another lock to prevent race conditions.
     private readonly SemaphoreSlim _lock = new(1, 1);
 
     public WatchedListStore(IWebHostEnvironment env)
@@ -30,6 +34,7 @@ public class WatchedListStore
         try
         {
             var all = await ReadAllAsync();
+            // Same show already saved for this user — no-op instead of a duplicate entry.
             if (all.Any(w => w.UserId == item.UserId && w.SourceUrl == item.SourceUrl))
             {
                 return;
@@ -59,6 +64,7 @@ public class WatchedListStore
         }
     }
 
+    // Reads skip the lock (only writes need to serialize)
     private async Task<List<WatchedItem>> ReadAllAsync()
     {
         if (!File.Exists(_filePath))
