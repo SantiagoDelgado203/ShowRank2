@@ -1,12 +1,29 @@
-﻿@using System.Net.Http
+﻿@* Every Razor file in this project will have these usings *@
+@* Reduces all of the import statements you have to write in every file.*@
+
+@* For making HTTP calls. *@
+@using System.Net.Http
 @using System.Net.Http.Json
+
+@* Adds prebuilt functions for components such as forms, routing, and web interactions.*@
+@using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
+
+@* Controls where the UI is rendered. *@
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
+
+@* For rendering long lists. *@
 @using Microsoft.AspNetCore.Components.Web.Virtualization
+
+@* Lets C# functionality call JS functionality. *@
 @using Microsoft.JSInterop
+
+@* For signing users in/out and writing the auth cookie. *@
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
 @using ShowRank
 @using ShowRank.Components
 @using ShowRank.Components.Layout

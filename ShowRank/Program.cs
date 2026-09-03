@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using ShowRank.Components;
 using ShowRank.Data;
+using ShowRank.Endpoints;
 using ShowRank.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddSingleton<UserStore>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<WatchedListStore>();
 
 builder.Services.AddHttpClient<AniListService>();
 builder.Services.AddHttpClient<TvMazeService>();
@@ -45,5 +47,6 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+app.MapWatchedEndpoints();
 
 app.Run();

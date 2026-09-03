@@ -1,30 +1,28 @@
+@* Sign in / create account only. Once signed in, this page immediately redirects to
+   /profile (see OnInitialized below) rather than showing account info here — that
+   content now lives in Profile.razor.
+   "/account/{Mode}" lets the URL be /account/signup to pre-select the Create Account tab. *@
 @page "/account"
 @page "/account/{Mode}"
+
+@* Allows you to pass and store the user's information. *@
 @using System.Security.Claims
-@using Microsoft.AspNetCore.Components
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.Cookies
 @using ShowRank.Models
 @using ShowRank.Services
+
+@* For validating user credentials. *@
 @inject AuthService AuthService
 @inject NavigationManager Nav
 
 <PageTitle>Sign In or Sign Up – ShowRank</PageTitle>
 
-<AuthorizeView Context="authState">
-    <Authorized>
-        <section class="auth-section">
-            <div class="auth-card">
-                <h2>Hi, @authState.User.Identity?.Name</h2>
-                <p class="auth-message">You're signed in as @authState.User.FindFirst(ClaimTypes.Email)?.Value.</p>
-                <a class="btn btn-outline-secondary w-100" href="logout">Sign out</a>
-            </div>
-        </section>
-    </Authorized>
-    <NotAuthorized>
-        <section class="auth-section">
-            <div class="auth-card">
-                <div class="auth-tabs">
+<section class="auth-section">
+    <div class="auth-card">
+        @* Tabs switch between Sign In and Create Account by navigating to a different URL
+           (/account vs /account/signup) rather than a client-side toggle, because this page
+           has no interactive render mode: HttpContext.SignInAsync below can only write the
+           auth cookie during a real HTTP request/response, not over a SignalR circuit. *@
+        <div class="auth-tabs">
             <a href="/account" class="auth-tab @(ShowSignUp ? "" : "active")">
                 Sign In
             </a>
@@ -35,6 +33,8 @@
 
         @if (!ShowSignUp)
         {
+            @* FormName distinguishes this form from the sign-up form below so Blazor knows
+               which one was posted (both live on the same page, just toggled by @if/else). *@
             <EditForm Model="@signInModel" FormName="signin" OnValidSubmit="HandleSignIn" class="auth-form">
                 <DataAnnotationsValidator />
 
@@ -95,18 +95,20 @@
                 }
             </EditForm>
         }
-            </div>
-        </section>
-    </NotAuthorized>
-</AuthorizeView>
+    </div>
+</section>
 
 @code {
+    // Value gets passed to the component via component tree without intermediate component. 
     [CascadingParameter]
+    // Setup HTTP requests/responses. 
     public HttpContext HttpContext { get; set; } = default!;
 
+    // Route value from "/account/{Mode}" — "signup" switches to the Create Account tab.
     [Parameter]
     public string? Mode { get; set; }
 
+    // Takes in data from the signin form. 
     [SupplyParameterFromForm(FormName = "signin")]
     private SignInModel signInModel { get; set; } = new();
 
@@ -117,8 +119,20 @@
 
     private bool ShowSignUp => string.Equals(Mode, "signup", StringComparison.OrdinalIgnoreCase);
 
+    protected override void OnInitialized()
+    {
+        // Already signed in? Send them to their profile instead of showing this form again.
+        if (HttpContext.User.Identity?.IsAuthenticated == true)
+        {
+            Nav.NavigateTo("/profile");
+        }
+    }
+
     protected override void OnParametersSet()
     {
+        // [SupplyParameterFromForm] can hand back null instead of respecting the property
+        // initializer (e.g. on the very first GET before any form has ever posted), so we
+        // guard against that here rather than relying on the initializer alone.
         signInModel ??= new();
         signUpModel ??= new();
     }
@@ -128,6 +142,7 @@
         var (success, error, user) = await AuthService.ValidateCredentialsAsync(signInModel);
         if (!success || user is null)
         {
+            // Wrong email/password: show the message and re-render the same form.
             authMessage = error;
             return;
         }
@@ -140,6 +155,7 @@
         var (success, error, user) = await AuthService.RegisterAsync(signUpModel);
         if (!success || user is null)
         {
+            // e.g. email already registered.
             authMessage = error;
             return;
         }
@@ -147,6 +163,7 @@
         await SignInUserAsync(user);
     }
 
+    // Pass in the name, email, and user id. 
     private async Task SignInUserAsync(Models.User user)
     {
         var claims = new List<Claim>
@@ -156,7 +173,11 @@
             new(ClaimTypes.Email, user.Email),
         };
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+        // Writes the auth cookie onto the current response. Works here because this page
+        // is statically rendered (a real HTTP request/response), not an interactive circuit.
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+
         Nav.NavigateTo("/", forceLoad: true);
     }
 }

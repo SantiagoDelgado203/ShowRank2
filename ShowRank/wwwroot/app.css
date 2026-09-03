@@ -59,6 +59,54 @@ h1:focus {
     text-align: start;
 }
 
+.section-subtitle {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+.auth-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.auth-message {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #eef7ee;
+    border: 1px solid #26b050;
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.kind-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+    border-radius: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.kind-anime {
+    background-color: #8d3cc4;
+}
+
+.kind-show {
+    background-color: #3c8dc4;
+}
+
 .genre-tag {
     display: inline-block;
     font-size: 0.75rem;
@@ -83,6 +131,12 @@ h1:focus {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+}
+
+.show-card-link {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     color: inherit;
     text-decoration: none;
 }
@@ -132,4 +186,37 @@ h1:focus {
 .review-count {
     color: #6c757d;
     margin-left: 0.35rem;
+}
+
+.watched-action-form {
+    padding: 0 1rem 1rem;
+}
+
+.btn-watched {
+    display: block;
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #1b6ec2;
+    border-radius: 0.35rem;
+    background-color: #fff;
+    color: #1b6ec2;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-watched:hover {
+    background-color: #eef5fc;
+}
+
+.btn-watched.added {
+    border-color: #26b050;
+    color: #1c7a37;
+    background-color: #eef7ee;
+}
+
+.btn-watched.added:hover {
+    background-color: #e2f3e2;
 }
