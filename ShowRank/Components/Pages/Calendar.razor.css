@@ -1,0 +1,16 @@
+.calendar-section {
+    margin-bottom: 4rem;
+}
+
+.section-subtitle {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+.calendar-placeholder {
+    border: 1px dashed #d0d0d0;
+    border-radius: 0.5rem;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #6c757d;
+}

@@ -1,0 +1,28 @@
+@page "/rankings"
+@using ShowRank.Data
+
+<PageTitle>Community Rankings – ShowRank</PageTitle>
+
+<section class="rankings-section">
+    <h1>Community Rankings</h1>
+    <p class="section-subtitle">The highest-rated shows across the entire ShowRank community.</p>
+
+    <ol class="ranking-list">
+        @foreach (var show in SampleShows.TopRankings)
+        {
+            <li class="ranking-item">
+                <span class="rank-number">#@show.Rank</span>
+                <div class="ranking-poster" style="background-color:@show.AccentColor">@show.Initial</div>
+                <div class="ranking-info">
+                    <h3>@show.Title</h3>
+                    <span class="genre-tag">@show.Genre</span>
+                    <p>@show.Description</p>
+                </div>
+                <div class="ranking-score">
+                    <span class="score-value">@show.Rating.ToString("0.0")</span>
+                    <span class="review-count">@show.ReviewCount.ToString("N0") reviews</span>
+                </div>
+            </li>
+        }
+    </ol>
+</section>

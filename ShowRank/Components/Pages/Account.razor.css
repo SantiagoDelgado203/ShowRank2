@@ -1,0 +1,45 @@
+.auth-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.auth-tabs {
+    display: flex;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.auth-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 0.75rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+}
+
+.auth-tab.active {
+    color: #1b6ec2;
+    border-bottom-color: #1b6ec2;
+}
+
+.auth-message {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #eef7ee;
+    border: 1px solid #26b050;
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+}

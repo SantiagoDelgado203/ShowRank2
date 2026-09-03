@@ -1,0 +1,43 @@
+@page "/"
+@using ShowRank.Data
+
+<PageTitle>ShowRank – Rate, Rank, Discover</PageTitle>
+
+<section class="hero">
+    <div class="hero-content">
+        <h1>Show<span class="accent">Rank</span></h1>
+        <p class="tagline">The community-driven home for movie & TV show reviews.</p>
+        <p class="description">
+            ShowRank helps you find what to watch next and keep track of what you've already loved (or hated).
+            Rate shows and movies, write reviews, get suggestions tailored to your taste, and see how your
+            favorites stack up against the rest of the community in our public rankings.
+        </p>
+        <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="account">Get Started</a>
+            <a class="btn btn-outline-light btn-lg" href="rankings">See Rankings</a>
+        </div>
+    </div>
+</section>
+
+<section class="suggestions-section">
+    <h2>Suggested For You</h2>
+    <p class="section-subtitle">A mix of what's trending with viewers who share your taste.</p>
+
+    <div class="show-grid">
+        @foreach (var show in SampleShows.Suggestions)
+        {
+            <div class="show-card">
+                <div class="show-poster" style="background-color:@show.AccentColor">@show.Initial</div>
+                <div class="show-info">
+                    <h3>@show.Title</h3>
+                    <span class="genre-tag">@show.Genre</span>
+                    <p>@show.Description</p>
+                    <div class="show-rating">
+                        <span class="stars">★ @show.Rating.ToString("0.0")</span>
+                        <span class="review-count">(@show.ReviewCount.ToString("N0") reviews)</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

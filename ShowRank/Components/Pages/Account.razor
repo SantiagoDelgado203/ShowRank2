@@ -1,0 +1,97 @@
+@page "/account"
+@using ShowRank.Models
+
+<PageTitle>Sign In or Sign Up – ShowRank</PageTitle>
+
+<section class="auth-section">
+    <div class="auth-card">
+        <div class="auth-tabs">
+            <button type="button" class="auth-tab @(ShowSignUp ? "" : "active")" @onclick="() => ShowSignUp = false">
+                Sign In
+            </button>
+            <button type="button" class="auth-tab @(ShowSignUp ? "active" : "")" @onclick="() => ShowSignUp = true">
+                Create Account
+            </button>
+        </div>
+
+        @if (!ShowSignUp)
+        {
+            <EditForm Model="@signInModel" OnValidSubmit="HandleSignIn" class="auth-form">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <InputText class="form-control" @bind-Value="signInModel.Email" placeholder="you@example.com" />
+                    <ValidationMessage For="@(() => signInModel.Email)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <InputText type="password" class="form-control" @bind-Value="signInModel.Password" placeholder="••••••••" />
+                    <ValidationMessage For="@(() => signInModel.Password)" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Sign In</button>
+
+                @if (!string.IsNullOrEmpty(authMessage))
+                {
+                    <p class="auth-message">@authMessage</p>
+                }
+            </EditForm>
+        }
+        else
+        {
+            <EditForm Model="@signUpModel" OnValidSubmit="HandleSignUp" class="auth-form">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Display Name</label>
+                    <InputText class="form-control" @bind-Value="signUpModel.DisplayName" placeholder="Your name" />
+                    <ValidationMessage For="@(() => signUpModel.DisplayName)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <InputText class="form-control" @bind-Value="signUpModel.Email" placeholder="you@example.com" />
+                    <ValidationMessage For="@(() => signUpModel.Email)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <InputText type="password" class="form-control" @bind-Value="signUpModel.Password" placeholder="••••••••" />
+                    <ValidationMessage For="@(() => signUpModel.Password)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Confirm Password</label>
+                    <InputText type="password" class="form-control" @bind-Value="signUpModel.ConfirmPassword" placeholder="••••••••" />
+                    <ValidationMessage For="@(() => signUpModel.ConfirmPassword)" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Create Account</button>
+
+                @if (!string.IsNullOrEmpty(authMessage))
+                {
+                    <p class="auth-message">@authMessage</p>
+                }
+            </EditForm>
+        }
+    </div>
+</section>
+
+@code {
+    private readonly SignInModel signInModel = new();
+    private readonly SignUpModel signUpModel = new();
+    private bool ShowSignUp;
+    private string? authMessage;
+
+    private void HandleSignIn()
+    {
+        authMessage = $"Thanks, {signInModel.Email}! Sign-in isn't wired up to an account system yet.";
+    }
+
+    private void HandleSignUp()
+    {
+        authMessage = $"Welcome, {signUpModel.DisplayName}! Account creation isn't wired up yet, but we've got your info.";
+    }
+}
