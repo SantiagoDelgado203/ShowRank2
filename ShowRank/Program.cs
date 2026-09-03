@@ -6,18 +6,23 @@ using ShowRank.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container. Lets components run on server
+//UI updates pushed to browser(Over SignalR Circuit not static rendering)
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<UserStore>();
+//Each user gets their own(scope is per circuit(per connecetd client)
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddSingleton<WatchedListStore>();
 
+//Adding our services
 builder.Services.AddHttpClient<AniListService>();
 builder.Services.AddHttpClient<TvMazeService>();
 builder.Services.AddScoped<SearchService>();
 
+//Cookie authentication
+//Redirects failures to /account not /account/login
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -39,9 +44,11 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
+//Reads cookie and enforces checks
 app.UseAuthentication();
 app.UseAuthorization();
 
+//CSRF protection
 app.UseAntiforgery();
 
 app.MapStaticAssets();

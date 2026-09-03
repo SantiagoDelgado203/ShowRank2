@@ -5,16 +5,20 @@ namespace ShowRank.Services;
 
 public class TvMazeService(HttpClient httpClient)
 {
+    //API call
     public async Task<List<SearchResult>> SearchAsync(string query, int limit = 10, CancellationToken cancellationToken = default)
     {
+        //Request
         var url = $"https://api.tvmaze.com/search/shows?q={Uri.EscapeDataString(query)}";
         using var response = await httpClient.GetAsync(url, cancellationToken);
         response.EnsureSuccessStatusCode();
 
+        //Parse raw stream into Json
         using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
 
         var results = new List<SearchResult>();
+        //loop through json for each show
         foreach (var entry in doc.RootElement.EnumerateArray().Take(limit))
         {
             var show = entry.GetProperty("show");
