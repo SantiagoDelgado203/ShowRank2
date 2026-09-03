@@ -3,6 +3,8 @@ using ShowRank.Models;
 
 namespace ShowRank.Data;
 
+// Called by search.razor, profile.razor and watchedendpoints
+
 // File-backed watched-list store (App_Data/watched.json) — all users' items in one flat
 // file, filtered by UserId 
 public class WatchedListStore

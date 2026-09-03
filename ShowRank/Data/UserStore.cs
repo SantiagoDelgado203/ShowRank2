@@ -3,6 +3,7 @@ using ShowRank.Models;
 
 namespace ShowRank.Data;
 
+// Called by AuthService.
 // File-backed user store (App_Data/users.json) — no database
 public class UserStore
 {
