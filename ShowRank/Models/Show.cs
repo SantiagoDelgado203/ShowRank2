@@ -1,5 +1,6 @@
 namespace ShowRank.Models;
 
+// Static/sample show data used for Home and Community Rankings (see Data/SampleShows.cs).
 public record Show(
     int Rank,
     string Title,

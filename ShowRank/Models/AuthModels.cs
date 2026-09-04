@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ShowRank.Models;
 
+// Bound to the sign-in form in Account.razor.
 public class SignInModel
 {
     [Required(ErrorMessage = "Email is required")]
@@ -12,6 +13,7 @@ public class SignInModel
     public string Password { get; set; } = string.Empty;
 }
 
+// Bound to the create-account form in Account.razor.
 public class SignUpModel
 {
     [Required(ErrorMessage = "Display name is required")]

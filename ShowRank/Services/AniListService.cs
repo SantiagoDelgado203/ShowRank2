@@ -4,6 +4,7 @@ using ShowRank.Models;
 
 namespace ShowRank.Services;
 
+
 public class AniListService(HttpClient httpClient)
 {
     private const string Endpoint = "https://graphql.anilist.co";

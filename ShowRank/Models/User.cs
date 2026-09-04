@@ -1,5 +1,6 @@
 namespace ShowRank.Models;
 
+// A registered account, persisted via UserStore.
 public class User
 {
     public int Id { get; set; }

@@ -1,5 +1,6 @@
 namespace ShowRank.Models;
 
+// A show/anime a user has saved to their watched list, persisted via WatchedListStore.
 public record WatchedItem(
     int UserId,
     string Title,
